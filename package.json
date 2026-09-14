@@ -1,0 +1,17 @@
+{
+  "name": "movie-ticket-booking-system",
+  "version": "1.0.0",
+  "description": "A complete, full-stack Movie Ticket Booking System for SEQA Post Lab",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "test": "node backend/test.js"
+  },
+  "keywords": ["movie-booking", "express", "seqa", "rest-api", "javascript"],
+  "author": "SEQA Student",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

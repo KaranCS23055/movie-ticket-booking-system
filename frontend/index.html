@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineWave - Movie Ticket Booking System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="site-header">
+    <div class="nav-container">
+      <div class="logo" id="nav-logo" role="button" tabindex="0">
+        <i class="fa-solid fa-film logo-icon"></i>
+        <span>Cine<strong>Wave</strong></span>
+      </div>
+
+      <nav class="nav-links" id="main-nav">
+        <button class="nav-btn active" id="nav-movies-btn" data-target="view-movies">
+          <i class="fa-solid fa-clapperboard"></i> Movies
+        </button>
+        <button class="nav-btn" id="nav-my-bookings-btn" data-target="view-my-bookings">
+          <i class="fa-solid fa-ticket"></i> My Bookings
+        </button>
+        <button class="nav-btn admin-only hidden" id="nav-admin-btn" data-target="view-admin">
+          <i class="fa-solid fa-gauge-high"></i> Admin Panel
+        </button>
+      </nav>
+
+      <div class="user-menu" id="user-menu-area">
+        <!-- Injected via JavaScript based on auth state -->
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION CONTAINER -->
+  <main class="main-content">
+
+    <!-- 1. LOGIN VIEW (Shown when unauthenticated or requested) -->
+    <section id="view-login" class="app-view hidden">
+      <div class="login-wrapper">
+        <div class="login-card">
+          <div class="login-header">
+            <div class="login-badge"><i class="fa-solid fa-shield-halved"></i></div>
+            <h2>Welcome Back</h2>
+            <p>Sign in to book tickets or manage theater operations</p>
+          </div>
+
+          <form id="login-form" class="auth-form" novalidate>
+            <div class="form-group">
+              <label for="login-email"><i class="fa-regular fa-envelope"></i> Email Address</label>
+              <input type="email" id="login-email" placeholder="name@example.com" required autocomplete="email" />
+              <span class="field-error" id="email-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+              <input type="password" id="login-password" placeholder="Enter password" required autocomplete="current-password" />
+              <span class="field-error" id="password-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="btn-submit-login">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+          </form>
+
+          <div class="demo-credentials-box">
+            <div class="demo-header">
+              <i class="fa-solid fa-bolt"></i> <strong>Quick Demo Login (1-Click)</strong>
+            </div>
+            <div class="demo-btn-group">
+              <button type="button" class="btn btn-demo-admin" id="btn-demo-admin">
+                <i class="fa-solid fa-user-shield"></i> Admin Demo
+              </button>
+              <button type="button" class="btn btn-demo-user" id="btn-demo-user-1">
+                <i class="fa-solid fa-user"></i> User (Sourish)
+              </button>
+            </div>
+            <p class="demo-tip">Preloaded credentials: <code>admin@cinema.com (admin123)</code> / <code>sourish@gmail.com (user123)</code></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MOVIES CATALOG VIEW (USER VIEW) -->
+    <section id="view-movies" class="app-view">
+      <!-- Hero Banner -->
+      <div class="hero-banner">
+        <div class="hero-content">
+          <span class="badge-tag">NOW SHOWING</span>
+          <h1>Experience Cinema In Its Purest Form</h1>
+          <p>Book seats for the biggest blockbusters in IMAX 3D, Dolby Atmos, and 4DX.</p>
+        </div>
+      </div>
+
+      <!-- Filters & Search Bar -->
+      <div class="catalog-controls">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="movie-search-input" placeholder="Search by title, genre, or language..." />
+          <button id="clear-search-btn" class="btn-icon hidden" title="Clear Search"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="genre-filter-pills" id="genre-pills">
+          <button class="pill active" data-genre="All">All Genres</button>
+          <button class="pill" data-genre="Sci-Fi">Sci-Fi</button>
+          <button class="pill" data-genre="Action">Action</button>
+          <button class="pill" data-genre="Drama">Drama</button>
+          <button class="pill" data-genre="Thriller">Thriller</button>
+        </div>
+      </div>
+
+      <!-- Movie Cards Grid -->
+      <div class="movies-grid" id="movies-grid-container">
+        <!-- Dynamically rendered -->
+      </div>
+    </section>
+
+    <!-- 3. MY BOOKINGS VIEW (USER VIEW) -->
+    <section id="view-my-bookings" class="app-view hidden">
+      <div class="section-container">
+        <div class="section-header">
+          <div>
+            <h2><i class="fa-solid fa-ticket"></i> My Bookings</h2>
+            <p>View your upcoming show tickets and cancellation history</p>
+          </div>
+          <button class="btn btn-secondary" id="refresh-bookings-btn">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+          </button>
+        </div>
+
+        <div class="bookings-list" id="my-bookings-container">
+          <!-- Dynamically rendered -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ADMIN DASHBOARD VIEW -->
+    <section id="view-admin" class="app-view hidden">
+      <div class="section-container">
+        <div class="admin-top-bar">
+          <div>
+            <h2><i class="fa-solid fa-gauge-high"></i> Admin Control Center</h2>
+            <p>Manage theater movies, screen schedules, and view reservations</p>
+          </div>
+          <div class="admin-top-actions">
+            <button class="btn btn-primary" id="btn-open-add-movie">
+              <i class="fa-solid fa-plus"></i> Add Movie
+            </button>
+            <button class="btn btn-accent" id="btn-open-add-show">
+              <i class="fa-solid fa-calendar-plus"></i> Add Show
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon icon-movies"><i class="fa-solid fa-film"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-title">Total Movies</span>
+              <span class="kpi-value" id="kpi-movies-count">0</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon icon-shows"><i class="fa-solid fa-calendar-days"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-title">Active Shows</span>
+              <span class="kpi-value" id="kpi-shows-count">0</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon icon-bookings"><i class="fa-solid fa-ticket"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-title">Total Bookings</span>
+              <span class="kpi-value" id="kpi-bookings-count">0</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon icon-revenue"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-title">Total Revenue</span>
+              <span class="kpi-value" id="kpi-revenue-count">₹0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Sub-Navigation Tabs -->
+        <div class="admin-tabs">
+          <button class="admin-tab active" data-tab="admin-movies-tab">
+            <i class="fa-solid fa-clapperboard"></i> Movies Management
+          </button>
+          <button class="admin-tab" data-tab="admin-shows-tab">
+            <i class="fa-solid fa-calendar-check"></i> Shows Schedule
+          </button>
+          <button class="admin-tab" data-tab="admin-bookings-tab">
+            <i class="fa-solid fa-list-check"></i> All Bookings
+          </button>
+        </div>
+
+        <!-- Sub-Tab 1: Movies Management -->
+        <div id="admin-movies-tab" class="admin-tab-pane active">
+          <div class="table-responsive">
+            <table class="data-table" id="admin-movies-table">
+              <thead>
+                <tr>
+                  <th>Poster</th>
+                  <th>Title</th>
+                  <th>Genre</th>
+                  <th>Duration</th>
+                  <th>Language</th>
+                  <th>Rating</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-movies-tbody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sub-Tab 2: Shows Schedule -->
+        <div id="admin-shows-tab" class="admin-tab-pane">
+          <div class="table-responsive">
+            <table class="data-table" id="admin-shows-table">
+              <thead>
+                <tr>
+                  <th>Movie</th>
+                  <th>Screen</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Ticket Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-shows-tbody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sub-Tab 3: All Bookings -->
+        <div id="admin-bookings-tab" class="admin-tab-pane">
+          <div class="table-responsive">
+            <table class="data-table" id="admin-bookings-table">
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Customer</th>
+                  <th>Movie & Screen</th>
+                  <th>Showtime</th>
+                  <th>Seats</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-bookings-tbody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. MOVIE DETAILS & SHOW SELECTOR MODAL -->
+  <div id="modal-movie-details" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <button class="modal-close-btn" data-close="modal-movie-details">&times;</button>
+      <div class="movie-detail-layout">
+        <div class="movie-detail-poster-wrap">
+          <img id="modal-movie-poster" src="" alt="Movie Poster" />
+        </div>
+        <div class="movie-detail-info">
+          <div class="detail-header-tags">
+            <span class="tag-badge" id="modal-movie-lang">English</span>
+            <span class="tag-badge" id="modal-movie-duration">150 min</span>
+            <span class="rating-badge"><i class="fa-solid fa-star"></i> <span id="modal-movie-rating">8.5</span></span>
+          </div>
+          <h2 id="modal-movie-title">Movie Title</h2>
+          <p class="detail-genre" id="modal-movie-genre">Genre</p>
+          <p class="detail-description" id="modal-movie-desc">Movie synopsis goes here.</p>
+
+          <hr class="modal-divider" />
+
+          <h3><i class="fa-solid fa-clock"></i> Select Show Date & Time</h3>
+          <div class="shows-list-container" id="modal-shows-container">
+            <!-- Dynamically populated showtime buttons -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SEAT SELECTION & BOOKING MODAL -->
+  <div id="modal-seat-selector" class="modal-overlay hidden">
+    <div class="modal-card modal-xl">
+      <button class="modal-close-btn" data-close="modal-seat-selector">&times;</button>
+      <div class="seat-modal-header">
+        <div>
+          <h2 id="seat-modal-movie-title">Movie Title</h2>
+          <p id="seat-modal-show-info" class="text-muted">Screen 1 • Date • Time</p>
+        </div>
+        <div class="seat-price-badge">
+          <span>Ticket Price:</span>
+          <strong id="seat-modal-price">₹350</strong>
+        </div>
+      </div>
+
+      <!-- Theater Screen Visual Curve -->
+      <div class="cinema-theater-screen-wrap">
+        <div class="curved-screen"></div>
+        <div class="screen-label">CINEMA SCREEN THIS WAY</div>
+      </div>
+
+      <!-- Seat Grid Layout -->
+      <div class="seat-map-container" id="seat-map-container">
+        <!-- Rendered Rows A to H, Cols 1 to 8 -->
+      </div>
+
+      <!-- Seat Legend -->
+      <div class="seat-legend">
+        <div class="legend-item">
+          <div class="seat-sample seat-available"></div>
+          <span>Available</span>
+        </div>
+        <div class="legend-item">
+          <div class="seat-sample seat-selected"></div>
+          <span>Selected</span>
+        </div>
+        <div class="legend-item">
+          <div class="seat-sample seat-booked"></div>
+          <span>Booked</span>
+        </div>
+      </div>
+
+      <!-- Booking Summary & Checkout Action -->
+      <div class="seat-booking-footer">
+        <div class="selected-seats-info">
+          <div>Selected Seats: <strong id="selected-seats-list" class="text-accent">None</strong></div>
+          <div>Quantity: <strong id="selected-seats-count">0</strong></div>
+          <div id="seat-selection-hint" class="seat-selection-hint text-muted" style="font-size: 0.8rem; margin-top: 4px;">
+            <i class="fa-solid fa-circle-info"></i> Please select at least 1 available seat to book.
+          </div>
+        </div>
+        <div class="booking-total-box">
+          <div class="total-label">Total Amount:</div>
+          <div class="total-price" id="selected-seats-total">₹0</div>
+        </div>
+        <button id="btn-confirm-booking" class="btn btn-primary btn-lg" disabled>
+          <i class="fa-solid fa-lock"></i> Book Tickets
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. BOOKING CONFIRMATION RECEIPT MODAL -->
+  <div id="modal-booking-success" class="modal-overlay hidden">
+    <div class="modal-card modal-ticket">
+      <button class="modal-close-btn" data-close="modal-booking-success">&times;</button>
+      <div class="ticket-slip">
+        <div class="ticket-header">
+          <div class="ticket-badge"><i class="fa-solid fa-circle-check"></i> BOOKING CONFIRMED</div>
+          <div class="ticket-confirmation-banner" id="receipt-confirmation-banner" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.6rem 0.8rem; margin: 0.5rem 0 1rem; text-align: center;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-success); margin-bottom: 2px;">
+              <i class="fa-solid fa-check-circle"></i> Reservation Successful!
+            </div>
+            <div id="receipt-confirmation-summary" style="font-size: 0.8rem; color: #e2e8f0;">
+              Your seats are confirmed and ready for your show.
+            </div>
+          </div>
+          <h2 id="receipt-movie-title">Movie Title</h2>
+          <p id="receipt-screen">Screen 1 (IMAX 3D)</p>
+        </div>
+
+        <div class="ticket-body">
+          <div class="ticket-row" style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.05);">
+            <div>
+              <span class="t-label">Movie Title</span>
+              <strong id="receipt-summary-movie" style="color: #fff; font-size: 0.95rem;">Movie Title</strong>
+            </div>
+            <div style="text-align: right;">
+              <span class="t-label">Show Timing</span>
+              <strong id="receipt-summary-timing" style="color: var(--accent-cyan); font-size: 0.95rem;">10:30 AM</strong>
+            </div>
+          </div>
+          <div class="ticket-row">
+            <div>
+              <span class="t-label">Booking ID</span>
+              <strong id="receipt-booking-id">bkg-1234</strong>
+            </div>
+            <div>
+              <span class="t-label">Customer</span>
+              <strong id="receipt-customer">Sourish Bhandakkar</strong>
+            </div>
+          </div>
+          <div class="ticket-row">
+            <div>
+              <span class="t-label">Date</span>
+              <strong id="receipt-date">2026-09-08</strong>
+            </div>
+            <div>
+              <span class="t-label">Showtime</span>
+              <strong id="receipt-time">10:30 AM</strong>
+            </div>
+          </div>
+          <div class="ticket-row" style="background: rgba(99, 102, 241, 0.1); padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.25);">
+            <div>
+              <span class="t-label">Selected Seat(s)</span>
+              <strong class="text-accent" id="receipt-seats" style="font-size: 1.05rem; letter-spacing: 0.5px;">C4, C5</strong>
+            </div>
+            <div style="text-align: right;">
+              <span class="t-label">Total Amount</span>
+              <strong class="text-success" id="receipt-total" style="font-size: 1.05rem;">₹700</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulated Barcode -->
+        <div class="ticket-barcode-wrap">
+          <div class="barcode-lines"></div>
+          <span class="barcode-number" id="receipt-barcode-code">WAVE-9283-CONFIRMED</span>
+        </div>
+
+        <div class="ticket-actions">
+          <button class="btn btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Ticket</button>
+          <button class="btn btn-primary" id="btn-receipt-to-bookings"><i class="fa-solid fa-ticket"></i> My Bookings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ADD / EDIT MOVIE MODAL (ADMIN) -->
+  <div id="modal-admin-movie" class="modal-overlay hidden">
+    <div class="modal-card modal-md">
+      <button class="modal-close-btn" data-close="modal-admin-movie">&times;</button>
+      <div class="modal-header">
+        <h3 id="modal-admin-movie-title"><i class="fa-solid fa-film"></i> Add New Movie</h3>
+      </div>
+      <form id="form-admin-movie" class="modal-form">
+        <input type="hidden" id="movie-form-id" />
+        <div class="form-group">
+          <label for="movie-form-title">Movie Title *</label>
+          <input type="text" id="movie-form-title" required placeholder="e.g. Interstellar" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="movie-form-genre">Genre *</label>
+            <input type="text" id="movie-form-genre" required placeholder="e.g. Sci-Fi / Adventure" />
+          </div>
+          <div class="form-group">
+            <label for="movie-form-duration">Duration *</label>
+            <input type="text" id="movie-form-duration" required placeholder="e.g. 150 min" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="movie-form-lang">Language *</label>
+            <input type="text" id="movie-form-lang" required placeholder="e.g. English, Hindi" />
+          </div>
+          <div class="form-group">
+            <label for="movie-form-rating">Rating (0 - 10) *</label>
+            <input type="number" step="0.1" min="0" max="10" id="movie-form-rating" required placeholder="8.5" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="movie-form-poster">Poster Image URL</label>
+          <input type="url" id="movie-form-poster" placeholder="https://example.com/poster.jpg" />
+        </div>
+        <div class="form-group">
+          <label for="movie-form-desc">Synopsis / Description *</label>
+          <textarea id="movie-form-desc" rows="3" required placeholder="Write a short movie description..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-close="modal-admin-movie">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-movie">Save Movie</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. ADD / EDIT SHOW MODAL (ADMIN) -->
+  <div id="modal-admin-show" class="modal-overlay hidden">
+    <div class="modal-card modal-md">
+      <button class="modal-close-btn" data-close="modal-admin-show">&times;</button>
+      <div class="modal-header">
+        <h3 id="modal-admin-show-title"><i class="fa-solid fa-calendar-plus"></i> Add New Show</h3>
+      </div>
+      <form id="form-admin-show" class="modal-form">
+        <input type="hidden" id="show-form-id" />
+        <div class="form-group">
+          <label for="show-form-movie">Select Movie *</label>
+          <select id="show-form-movie" required>
+            <option value="">-- Choose a Movie --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="show-form-screen">Screen / Auditorium *</label>
+          <select id="show-form-screen" required>
+            <option value="Screen 1 (IMAX 3D)">Screen 1 (IMAX 3D)</option>
+            <option value="Screen 2 (Dolby Atmos)">Screen 2 (Dolby Atmos)</option>
+            <option value="Screen 3 (4DX Experience)">Screen 3 (4DX Experience)</option>
+            <option value="Screen 4 (Gold Class)">Screen 4 (Gold Class)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="show-form-date">Show Date *</label>
+            <input type="date" id="show-form-date" required />
+          </div>
+          <div class="form-group">
+            <label for="show-form-time">Show Time *</label>
+            <input type="text" id="show-form-time" required placeholder="e.g. 10:30 AM or 07:15 PM" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="show-form-price">Ticket Price (₹) *</label>
+          <input type="number" min="50" step="10" id="show-form-price" required placeholder="350" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-close="modal-admin-show">Cancel</button>
+          <button type="submit" class="btn btn-accent" id="btn-save-show">Save Show</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <p>&copy; 2026 CineWave - Software Engineering & Quality Assurance (SEQA) Post Lab Project.</p>
+      <p class="text-muted">Built with Node.js, Express, Vanilla JS & REST APIs.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
